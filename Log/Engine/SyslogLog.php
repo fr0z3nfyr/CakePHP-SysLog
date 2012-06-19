@@ -1,5 +1,5 @@
 <?php
-App::uses('BaseLog', 'Log/Engine');
+App::uses('BaseLog', 'SysLog.Log/Engine');
 
 /**
  * SyslogLog
