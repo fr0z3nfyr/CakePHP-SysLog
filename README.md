@@ -1,7 +1,7 @@
 CakePHP Syslog
 ==============
 
-A log engine for using syslog, designed for use with CakePHP 2.1
+A log engine for using syslog, designed for use with CakePHP 2.x
 
 ##Installation
 
