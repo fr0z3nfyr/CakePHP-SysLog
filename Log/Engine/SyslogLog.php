@@ -1,5 +1,5 @@
 <?php
-App::uses('BaseLog', 'Log/Engine');
+App::uses('BaseLog', 'SysLog.Log/Engine');
 
 /**
  * SyslogLog
@@ -73,7 +73,7 @@ class SyslogLog extends BaseLog {
  * log messages, pass all messages through the format defined in the config
  *
  * @param string $type
- * @param mixed $message
+ * @param string $message
  */
 	public function write($type, $message) {
 		if (!in_array($type, $this->_config['types'])) {
