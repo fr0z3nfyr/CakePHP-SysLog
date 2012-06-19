@@ -1,6 +1,15 @@
 CakePHP Syslog
 ==============
 
+##Installation
+
+Install like any other CakePHP plugin:
+
+    cd app/Plugin
+    git clone git://github.com/nodesagency/CakePHP-SysLog.git SysLog
+
+##Usage
+
 A log engine for using syslog, designed for use with CakePHP 2.2+
 
 To use add the following to your `app/Config/bootstrap.php` file
