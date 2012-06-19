@@ -96,7 +96,6 @@ class SyslogLog extends BaseLog {
  * @return bool
  */
 	protected function _write($priority, $output) {
-		echo "\n$output\n";
 		return syslog($priority, $output);
 	}
 }
