@@ -62,7 +62,17 @@ class SyslogLog extends BaseLog {
  * @param array $config
  */
 	public function __construct($config = array()) {
+		$this->_defaultConfig['formatter'] = 'basic';
 		$config += $this->_defaultConfig;
+		if (!is_callable($config['formatter'])) {
+			$method = "_{$config['formatter']}Formatter";
+			if (is_callable(array($this, $method))) {
+				$config['formatter'] = array($this, $method);
+			} else {
+				trigger_error(__CLASS__ . "::$method doesn't exist, using _basicFormatter instead");
+				$config['formatter'] = array($this, '_basicFormatter');
+			}
+		}
 		parent::__construct($config);
 	}
 
@@ -85,11 +95,71 @@ class SyslogLog extends BaseLog {
 			$priority = $this->_typeMap[$type];
 		}
 
-		$messages = explode("\n", $message);
+		$messages = call_user_func($this->_config['formatter'], $message, $this->_config['format'], $type);
 		foreach ($messages as $message) {
-			$message = sprintf($this->_config['format'], $type, $message);
 			$this->_write($priority, $message);
 		}
+	}
+
+/**
+ * _basicFormatter
+ *
+ * Default formatter - adds a prefix only
+ *
+ * @param string $messages
+ * @param string $format
+ * @param string $type
+ * @return array
+ */
+	protected function _basicFormatter($messages, $format, $type) {
+		return array(sprintf($format, $type, $messages));
+	}
+
+/**
+ * _prefixFormatter
+ *
+ * Splits all messages into an array, and adds a prefix to all lines
+ *
+ * @param string $messages
+ * @param string $format
+ * @param string $type
+ * @return array
+ */
+	protected function _prefixFormatter($messages, $format, $type) {
+		if (!is_array($messages)) {
+			$messages = explode("\n", $messages);
+		}
+
+		foreach ($messages as &$message) {
+			$message = sprintf($format, $type, $message);
+		}
+		return $messages;
+	}
+
+/**
+ * _detailsFormatter
+ *
+ * Splits all messages into an array, and adds a prefix to all lines
+ *
+ * @param string $messages
+ * @param string $format
+ * @param string $type
+ * @return array
+ */
+	protected function _detailsFormatter($messages, $format, $type) {
+		$messages = explode("\n", $messages);
+		if (!empty($this->_config['request'])) {
+			$request = $this->_config['request'];
+		} else {
+			$request = "url: " . env('REQUEST_URI') . ' ip: ' . env('REMOTE_IP');
+			$_POST = array('foo' => 'bar');
+			if (!empty($_POST)) {
+				$request .= 'post = ' . json_encode($_POST);
+			}
+		}
+		array_splice($messages, 1, 0, $request);
+
+		return $this->_prefixFormatter($messages, $format, $type);
 	}
 
 /**
@@ -102,6 +172,8 @@ class SyslogLog extends BaseLog {
  * @return bool
  */
 	protected function _write($priority, $output) {
+		echo $output ."\n";
+
 		return syslog($priority, $output);
 	}
 }
