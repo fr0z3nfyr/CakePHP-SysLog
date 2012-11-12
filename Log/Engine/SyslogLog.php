@@ -36,6 +36,13 @@ class SyslogLog extends BaseLog {
 	);
 
 /**
+ * Whether there was any information logged during the request or not
+ *
+ * @var boolean
+ **/
+	protected $_written = false;
+
+/**
  * _priorityMap
  *
  * Used to map the string names back to their LOG_* values
@@ -95,13 +102,27 @@ class SyslogLog extends BaseLog {
 /**
  * _write
  *
- * Wrapper for syslog call - issolated to permit sub-classing and/or mocking for tests
+ * Wrapper for syslog call - isolated to permit sub-classing and/or mocking for tests
  *
  * @param int $priority
  * @param sting $output
  * @return bool
  */
 	protected function _write($priority, $output) {
+		$this->_written = true;
 		return syslog($priority, $output);
 	}
+
+/**
+ * Waits 200ms in order to give time syslog to deliver any data
+ * on cli environment
+ *
+ * @return void
+ **/
+	public function __destruct() {
+		if (PHP_SAPI === 'cli' && $this->_written) {
+			usleep(200000);
+		}
+	}
+
 }
