@@ -120,9 +120,7 @@ class SyslogLog extends BaseLog {
  * @return void
  **/
 	public function __destruct() {
-		if (PHP_SAPI === 'cli' && $this->_written) {
-			usleep(200000);
-		}
+		closelog();
 	}
 
 }
